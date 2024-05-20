@@ -1,0 +1,64 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  createdAt  DateTime  @default(now())
+  email      String?
+  id         String    @id @default(cuid())
+  name       String?
+  phone      String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  rent       Rent?     @relation(name: "RentOnTenants", fields: [rentId], references: [id])
+  rentId     String?
+  rents      Rent[]    @relation(name: "RentsOnTenant")
+  updatedAt  DateTime  @updatedAt
+}
+
+model Document {
+  createdAt  DateTime  @default(now())
+  id         String    @id @default(cuid())
+  path       String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  title      String?
+  updatedAt  DateTime  @updatedAt
+  uploadedAt DateTime?
+}
+
+model Rent {
+  amount     Float?
+  createdAt  DateTime        @default(now())
+  dueDate    DateTime?
+  id         String          @id @default(cuid())
+  property   Property?       @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  status     EnumRentStatus?
+  tenant     Tenant?         @relation(name: "RentsOnTenant", fields: [tenantId], references: [id])
+  tenantId   String?
+  tenants    Tenant[]        @relation(name: "RentOnTenants")
+  updatedAt  DateTime        @updatedAt
+}
+
+model Property {
+  address   String?
+  city      String?
+  createdAt DateTime   @default(now())
+  documents Document[]
+  id        String     @id @default(cuid())
+  rents     Rent[]
+  state     String?
+  tenants   Tenant[]
+  updatedAt DateTime   @updatedAt
+  zipCode   String?
+}
+
+enum EnumRentStatus {
+  Option1
+}
